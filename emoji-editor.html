@@ -1383,7 +1383,7 @@
 
       var lastContent = localStorage.getItem('lastContent');
       if (lastContent)
-        document.execCommand('insertHTML', false, lastContent.replace(/<\/div[^>]*>/g, ''));
+        gEditor.innerHTML = lastContent.replace(/<\/div[^>]*>/g, '');
 
       gEditor.addEventListener('keypress', function(aEvent){
         if (aEvent.keyCode == aEvent.DOM_VK_TAB &&
