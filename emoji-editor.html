@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<!--
+  Emoji Editor
+  Copyright 2016 YUKI "Piro" Hiroshi
+  The MIT License: http://opensource.org/licenses/MIT
+
+  Original:
+    "preview.html" from https://github.com/twitter/twemoji
+    Copyright 2014 Twitter, Inc and other contributors
+    Code licensed under the MIT License: http://opensource.org/licenses/MIT
+-->
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Emoji Editor</title>
+    <style>
+    #emoji-palette ul {
+      margin: 0 0 1em 0;
+      padding: 0;
+    }
+    li.emoji,
+    li.emoji * {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    li.emoji {
+      cursor: pointer;
+      font-size: 36px;
+      width: 36px;
+      height: 36px;
+      display: inline-block;
+      padding: 2px;
+      margin: 4px;
+    }
+    img.emoji {
+      height: 1em;
+      width: 1em;
+      margin: 0 .05em 0 .1em;
+      vertical-align: -0.1em;
+    }
+    h1, h2 {
+      display: none;
+    }
+    #editor {
+      border: 1px inset;
+      padding: 0.5em;
+      overflow: auto;
+      height: 20em;
+      resize: vertical;
+      white-space: pre-wrap;
+    }
+    #editor[data-blank="true"]:not(:focus):not(:active)::before {
+      content: attr(data-placeholder);
+      opacity: 0.5;
+    }
+    #recent {
+      padding: 0.5em;
+      position: fixed;
+      left: 0;
+      right: 0;
+      border-bottom: 1px solid gray;
+      max-height: 100px;
+    }
+    #recent h3 {
+      display: none;
+    }
+    #all h3:first-child {
+      margin-top: 0.2em;
+    }
+    #all {
+      padding: 0.5em;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: auto;
+    }
+    </style>
+    <!--script src="./twemoji.min.js"></script-->
+  </head>
+  <body onload="init();"
+        onunload="destroy();"
+        onresize="updateLayout();">
+    <h1>Simple Text Editor with Twitter Emoji (Twemoji)</h1>
+    <div id="editor"
+         contenteditable="true"
+         data-placeholder="Input text including Emoji here."
+         data-blank="true"></div>
+    <section id="emoji-palette"
+             onclick="insertEmoji(event);">
+      <h2>Available Emoji</h2>
+      <section id="recent">
+        <h3>Recent</h3>
+        <ul>
+        </ul>
+      </section>
+      <section id="all">
+        <h3>People, emotion</h3>
+        <ul>
+          <!-- Face, emoticon -->
+          <li>😁</li>
+          <li>😂</li>
+          <li>🙂</li>
+          <li>😃</li>
+          <li>😄</li>
+          <li>😅</li>
+          <li>😆</li>
+          <li>🤣</li>
+          <li>🙃</li>
+          <li>🤗</li>
+          <li>😉</li>
+          <li>😊</li>
+          <li>😋</li>
+          <li>🤤</li>
+          <li>😍</li>
+          <li>😘</li>
+          <li>😚</li>
+          <li>☺</li>
+          <li>😏</li>
+          <li>😣</li>
+          <li>😥</li>
+          <li>😪</li>
+          <li>😫</li>
+          <li>😌</li>
+          <li>😜</li>
+          <li>😝</li>
+          <li>😒</li>
+          <li>😓</li>
+          <li>😔</li>
+          <li>😖</li>
+
+
+          <!-- Sick -->
+          <li>😷</li>
+          <li>🤕</li>
+          <li>🤢</li>
+          <li>🤧</li>
+
+          <li>😲</li>
+          <li>😞</li>
+          <li>😤</li>
+          <li>😢</li>
+          <li>😭</li>
+          <li>😨</li>
+          <li>😩</li>
+          <li>😰</li>
+          <li>😱</li>
+          <li>😳</li>
+          <li>🙄</li>
+          <li>😵</li>
+          <li>😡</li>
+          <li>😠</li>
+          <li>👿</li>
+          <li>😀</li>
+          <li>😇</li>
+          <li>😈</li>
+          <li>😎</li>
+          <li>😐</li>
+          <li>😑</li>
+          <li>😕</li>
+          <li>😗</li>
+          <li>😙</li>
+          <li>😛</li>
+          <li>😟</li>
+          <li>😦</li>
+          <li>🙁</li>
+          <li>☹</li>
+          <li>😧</li>
+          <li>😬</li>
+          <li>😮</li>
+          <li>😯</li>
+          <li>🤔</li>
+          <li>😴</li>
+          <li>😶</li>
+          <li>🤐</li>
+          <li>🤑</li>
+          <li>🤒</li>
+          <li>🤓</li>
+          <li>🤥</li>
+ 
+          <!-- Non-human -->
+          <li>👹</li>
+          <li>👺</li>
+          <li>💀</li>
+          <li>👻</li>
+          <li>👽</li>
+          <li>👾</li>
+          <li>💩</li>
+          <li>🤖</li>
+          <li>🤠</li>
+          <li>🤡</li>
+          <li>😺</li>
+          <li>😸</li>
+          <li>😹</li>
+          <li>😻</li>
+          <li>😼</li>
+          <li>😽</li>
+          <li>🙀</li>
+          <li>😿</li>
+          <li>😾</li>
+          <li>🙈</li>
+          <li>🙉</li>
+          <li>🙊</li>
+
+          <!-- Human -->
+          <li>👦</li>
+          <li>👧</li>
+          <li>👨</li>
+          <li>👩</li>
+          <li>👴</li>
+          <li>👵</li>
+          <li>👶</li>
+          <li>👮</li>
+          <li>👷</li>
+          <li>⛑</li>
+          <li>👸</li>
+          <li>💂</li>
+          <li>👱</li>
+          <li>👲</li>
+          <li>👳</li>
+          <li>🎅</li>
+          <li>👼</li>
+          <li>🤴</li>
+          <li>🤵</li>
+          <li>🤶</li>
+          <li>🕴</li>
+ 
+          <li>👬</li>
+          <li>👭</li>
+          <li>👯</li>
+          <li>💆</li>
+          <li>💇</li>
+          <li>👰</li>
+          <li>🙍</li>
+          <li>🙎</li>
+          <li>🙅</li>
+          <li>🙆</li>
+          <li>💁</li>
+          <li>🙋</li>
+          <li>🤦</li>
+          <li>🤷</li>
+          <li>🙇</li>
+          <li>🙌</li>
+          <li>🙏</li>
+          <li>👤</li>
+          <li>👥</li>
+ 
+          <li>🚶</li>
+          <li>🏃</li>
+          <li>💃</li>
+
+          <!-- Family -->
+          <li>👫</li>
+          <li>💏</li>
+          <li>💑</li>
+          <li>🤰</li>
+          <li>👪</li>
+
+          <!-- Hand, arm -->
+          <li>💪</li>
+          <li>👈</li>
+          <li>👉</li>
+          <li>☝</li>
+          <li>👆</li>
+          <li>👇</li>
+          <li>🖐</li>
+          <li>✌</li>
+          <li>✊</li>
+          <li>✋</li>
+          <li>👊</li>
+          <li>👌</li>
+          <li>👍</li>
+          <li>👎</li>
+          <li>🖕</li>
+          <li>👋</li>
+          <li>👏</li>
+          <li>👐</li>
+          <li>🤘</li>
+          <li>🤙</li>
+          <li>🤚</li>
+          <li>🤛</li>
+          <li>🤜</li>
+          <li>🤝</li>
+          <li>🤞</li>
+          <li>🖖</li>
+          <li>✍</li>
+          <li>💅</li>
+          <li>🤳</li>
+
+          <!-- Face parts -->
+          <li>👂</li>
+          <li>👃</li>
+          <li>👣</li>
+          <li>👁</li>
+          <li>👀</li>
+          <li>👅</li>
+          <li>👄</li>
+          <li>💋</li>
+
+          <!-- Emotion -->
+          <li>💘</li>
+          <li>❤</li>
+          <li>💓</li>
+          <li>💔</li>
+          <li>💕</li>
+          <li>💖</li>
+          <li>💗</li>
+          <li>💙</li>
+          <li>💚</li>
+          <li>💛</li>
+          <li>💜</li>
+          <li>💝</li>
+          <li>💞</li>
+          <li>💟</li>
+          <li>❣</li>
+          <li>💌</li>
+          <li>💤</li>
+          <li>💢</li>
+          <li>💣</li>
+          <li>☠</li>
+          <li>💥</li>
+          <li>☢</li>
+          <li>☣</li>
+          <li>💦</li>
+          <li>💧</li>
+          <li>💨</li>
+          <li>💫</li>
+          <li>🗣</li>
+          <li>🗨</li>
+          <li>💬</li>
+          <li>🗯</li>
+          <li>👁‍🗨</li>
+          <li>💭</li>
+          <li>‼</li>
+          <li>⁉</li>
+          <li>❓</li>
+          <li>❔</li>
+          <li>❕</li>
+          <li>❗</li>
+          <li>☀</li>
+          <li>⭐</li>
+          <li>🌟</li>
+          <li>🎵</li>
+          <li>🎶</li>
+          <li>✨</li>
+          <li>🔥</li>
+          <li>🎉</li>
+          <li>🎊</li>
+          <li>🎁</li>
+          <li>🎀</li>
+          <li>🎗</li>
+          <li>🏵</li>
+        </ul>
+        <h3>Fashion</h3>
+        <ul>
+          <li>👓</li>
+          <li>🕶</li>
+          <li>👔</li>
+          <li>👕</li>
+          <li>👖</li>
+          <li>👗</li>
+          <li>👘</li>
+          <li>👙</li>
+          <li>👚</li>
+          <li>👛</li>
+          <li>👜</li>
+          <li>👝</li>
+          <li>🎒</li>
+          <li>🛍</li>
+          <li>👞</li>
+          <li>👟</li>
+          <li>👠</li>
+          <li>👡</li>
+          <li>👢</li>
+          <li>👑</li>
+          <li>👒</li>
+          <li>🎩</li>
+          <li>🎓</li>
+          <li>⛑</li>
+          <li>💄</li>
+          <li>💍</li>
+          <li>💎</li>
+        </ul>
+        <h3>Animals</h3>
+        <ul>
+          <!-- Eto -->
+          <li>🐀</li>
+          <li>🐁</li>
+          <li>🐂</li>
+          <li>🐃</li>
+          <li>🐄</li>
+          <li>🐅</li>
+          <li>🐆</li>
+          <li>🐇</li>
+          <li>🐈</li>
+          <li>🐉</li>
+          <li>🐊</li>
+          <li>🐍</li>
+          <li>🐎</li>
+          <li>🐏</li>
+          <li>🐐</li>
+          <li>🐒</li>
+          <li>🐓</li>
+          <li>🐕</li>
+          <li>🐖</li>
+ 
+          <!-- Eto Face -->
+          <li>🐭</li>
+          <li>🐹</li>
+
+          <li>🐮</li>
+
+          <li>🐯</li>
+
+          <li>🐰</li>
+
+          <li>🐲</li>
+
+          <li>🐴</li>
+          <li>🦄</li>
+
+          <li>🐑</li>
+
+          <li>🐵</li>
+          <li>🦍</li>
+
+          <li>🐶</li>
+          <li>🐩</li>
+          <li>🐺</li>
+
+          <li>🐷</li>
+          <li>🐗</li>
+          <li>🐽</li>
+
+          <li>🐱</li>
+ 
+          <li>🐪</li>
+          <li>🐫</li>
+          <li>🐘</li>
+          <li>🐻</li>
+          <li>🐨</li>
+          <li>🐼</li>
+          <li>🦁</li>
+          <li>🦊</li>
+          <li>🦌</li>
+          <li>🦏</li>
+
+          <li>🐾</li>
+
+          <li>🐔</li>
+          <li>🐣</li>
+          <li>🐤</li>
+          <li>🐥</li>
+          <li>🐦</li>
+          <li>🐧</li>
+          <li>🦃</li>
+          <li>🦅</li>
+          <li>🦆</li>
+          <li>🦉</li>
+          <li>🦇</li>
+
+          <li>🐸</li>
+          <li>🐢</li>
+          <li>🦎</li>
+
+          <li>🐋</li>
+          <li>🐳</li>
+          <li>🐬</li>
+          <li>🦈</li>
+          <li>🐟</li>
+          <li>🐠</li>
+          <li>🐡</li>
+          <li>🦀</li>
+          <li>🦐</li>
+          <li>🐙</li>
+          <li>🦑</li>
+          <li>🐚</li>
+
+          <li>🐌</li>
+          <li>🐛</li>
+          <li>🐜</li>
+          <li>🐝</li>
+          <li>🐞</li>
+          <li>🦋</li>
+          <li>🦂</li>
+          <li>🕷</li>
+          <li>🕸</li>
+        </ul>
+        <h3>Plants, foods</h3>
+        <ul>
+          <!-- Flower -->
+          <li>💐</li>
+          <li>🌸</li>
+          <li>💮</li>
+          <li>🌹</li>
+          <li>🌺</li>
+          <li>🌻</li>
+          <li>🌼</li>
+          <li>🥀</li>
+          <li>🌷</li>
+          <li>🌱</li>
+          <li>⚜</li>
+ 
+          <!-- Tree -->
+          <li>🌲</li>
+          <li>🌳</li>
+          <li>🌴</li>
+          <li>🌵</li>
+          <li>🌾</li>
+          <!-- Leaf -->
+          <li>🌿</li>
+          <li>☘</li>
+          <li>🍀</li>
+          <li>🍁</li>
+          <li>🍂</li>
+          <li>🍃</li>
+
+          <!-- Fluits -->
+          <li>🍇</li>
+          <li>🍈</li>
+          <li>🍉</li>
+          <li>🍊</li>
+          <li>🍋</li>
+          <li>🍌</li>
+          <li>🍍</li>
+          <li>🍎</li>
+          <li>🍏</li>
+          <li>🍐</li>
+          <li>🍑</li>
+          <li>🍒</li>
+          <li>🍓</li>
+          <li>🍅</li>
+          <li>🍆</li>
+          <li>🥝</li>
+
+          <!-- Vegetable -->
+          <li>🌽</li>
+          <li>🍄</li>
+          <li>🌰</li>
+          <li>🥑</li>
+          <li>🥒</li>
+          <li>🥕</li>
+          <li>🥔</li>
+          <li>🥜</li>
+          <li>🌶</li>
+
+          <!-- Bread -->
+          <li>🍞</li>
+          <li>🥐</li>
+
+          <!-- Meat -->
+          <li>🍖</li>
+          <li>🍗</li>
+          <li>🥓</li>
+          <li>🥖</li>
+          <!-- Fast foods -->
+          <li>🍔</li>
+          <li>🍟</li>
+          <li>🍕</li>
+          <li>🥙</li>
+          <li>🌭</li>
+          <li>🌮</li>
+          <li>🌯</li>
+          <li>🍿</li>
+
+          <!-- (Japanese) foods-->
+          <li>🍲</li>
+          <li>🍱</li>
+          <li>🍘</li>
+          <li>🍙</li>
+          <li>🍚</li>
+          <li>🍛</li>
+          <li>🍜</li>
+          <li>🍝</li>
+          <li>🍠</li>
+          <li>🍢</li>
+          <li>🍣</li>
+          <li>🍤</li>
+          <li>🍥</li>
+          <li>🥗</li>
+          <li>🥘</li>
+          <li>🧀</li>
+          <!-- Egg -->
+          <li>🥚</li>
+          <li>🍳</li>
+
+          <!-- Sweets -->
+          <li>🍡</li>
+          <li>🍦</li>
+          <li>🍧</li>
+          <li>🍨</li>
+          <li>🍩</li>
+          <li>🍪</li>
+          <li>🎂</li>
+          <li>🍰</li>
+          <li>🥞</li>
+          <li>🍫</li>
+          <li>🍬</li>
+          <li>🍭</li>
+          <li>🍮</li>
+          <li>🍯</li>
+ 
+          <!-- Drinks -->
+          <li>☕</li>
+          <li>🍵</li>
+          <li>🍶</li>
+          <li>🍷</li>
+          <li>🍸</li>
+          <li>🍹</li>
+          <li>🍺</li>
+          <li>🍻</li>
+          <li>🥂</li>
+          <li>🍾</li>
+          <li>🥃</li>
+          <li>🥛</li>
+          <li>🍼</li>
+
+          <!-- Silvers -->
+          <li>🥄</li>
+          <li>🍴</li>
+          <li>🍽</li>
+          <li>🔪</li>
+        </ul>
+        <h3>Seasons, events</h3>
+        <ul>
+          <!-- Seasons -->
+          <li>🎃</li>
+          <li>🎄</li>
+          <li>🎆</li>
+          <li>🎇</li>
+          <li>🎋</li>
+          <li>🎌</li>
+          <li>🎍</li>
+          <li>🎎</li>
+          <li>🎏</li>
+          <li>🎐</li>
+          <li>🎑</li>
+
+          <!-- Ball -->
+          <li>⚽</li>
+          <li>⚾</li>
+          <li>🏀</li>
+          <li>🏈</li>
+          <li>🏉</li>
+          <li>🎾</li>
+          <li>🎱</li>
+          <li>🏐</li>
+          <li>🎈</li>
+
+          <!-- Sports -->
+          <li>🎳</li>
+          <li>⛳</li>
+          <li>🏌</li>
+          <li>🏏</li>
+          <li>🏑</li>
+          <li>🏒</li>
+          <li>🏓</li>
+          <li>⛸</li>
+          <li>🎣</li>
+          <li>🎽</li>
+          <li>🎿</li>
+          <li>⛷</li>
+          <li>🏂</li>
+          <li>🏄</li>
+          <li>🏊</li>
+          <li>🤽</li>
+          <li>🚴</li>
+          <li>🚵</li>
+          <li>🏇</li>
+          <li>⛹</li>
+          <li>🤸</li>
+          <li>🤹</li>
+          <li>🤺</li>
+          <li>🤻</li>
+          <li>🤼</li>
+          <li>🤾</li>
+          <li>🏋</li>
+          <li>🥅</li>
+          <li>🥆</li>
+          <li>🏸</li>
+          <li>🏹</li>
+          <li>🥊</li>
+          <li>🥋</li>
+
+          <!-- Prizes -->
+          <li>🏆</li>
+          <li>🥇</li>
+          <li>🥈</li>
+          <li>🥉</li>
+          <li>🎖</li>
+
+          <!-- Games -->
+          <li>🎯</li>
+          <li>🎮</li>
+          <li>🕹</li>
+          <li>🎲</li>
+          <li>♠</li>
+          <li>♥</li>
+          <li>♦</li>
+          <li>♣</li>
+          <li>🃏</li>
+          <li>🀄</li>
+          <li>🎴</li>
+
+          <!-- Sound, music -->
+          <li>🔊</li>
+          <li>📢</li>
+          <li>📣</li>
+          <li>🔔</li>
+          <li>🛎</li>
+          <li>🎼</li>
+          <li>🎤</li>
+          <li>🎧</li>
+          <li>🎙</li>
+          <li>🎷</li>
+          <li>🎸</li>
+          <li>🎹</li>
+          <li>🎺</li>
+          <li>🎻</li>
+          <li>📯</li>
+          <li>🥁</li>
+
+          <!-- Science -->
+          <li>🔬</li>
+          <li>🔭</li>
+          <li>🔍</li>
+          <li>🔎</li>
+          <li>📡</li>
+          <li>🔮</li>
+          <li>⚖</li>
+          <li>⚗</li>
+          <li>⚛</li>
+          <li>🌡</li>
+ 
+          <!-- Electronics -->
+          <li>📻</li>
+          <li>📱</li>
+          <li>📲</li>
+          <li>☎</li>
+          <li>📞</li>
+          <li>📟</li>
+          <li>📠</li>
+          <li>🔋</li>
+          <li>🔌</li>
+          <li>⌨</li>
+          <li>🖱</li>
+          <li>🖲</li>
+          <li>🖥</li>
+          <li>🖨</li>
+          <li>💻</li>
+          <li>💽</li>
+          <li>💾</li>
+          <li>💿</li>
+          <li>📀</li>
+
+          <!-- Movie, TV -->
+          <li>🎥</li>
+          <li>🎫</li>
+          <li>🎬</li>
+          <li>📺</li>
+          <li>📷</li>
+          <li>📸</li>
+          <li>📹</li>
+          <li>📼</li>
+          <li>🎞</li>
+          <li>📽</li>
+
+          <!-- Lights -->
+          <li>🕯</li>
+          <li>🕎</li>
+          <li>💡</li>
+          <li>🔦</li>
+          <li>🏮</li>
+
+          <!-- Books -->
+          <li>📔</li>
+          <li>📕</li>
+          <li>📖</li>
+          <li>📗</li>
+          <li>📘</li>
+          <li>📙</li>
+          <li>📚</li>
+          <li>📓</li>
+          <li>📒</li>
+          <li>🗒</li>
+          <li>📃</li>
+          <li>📜</li>
+          <li>📄</li>
+          <li>📰</li>
+          <li>📑</li>
+          <li>🔖</li>
+
+          <!-- Money -->
+          <li>💰</li>
+          <li>💴</li>
+          <li>💵</li>
+          <li>💶</li>
+          <li>💷</li>
+          <li>💸</li>
+          <li>💳</li>
+          <li>🎟</li>
+          <li>💹</li>
+
+          <!-- Letters -->
+          <li>✉</li>
+          <li>📧</li>
+          <li>📨</li>
+          <li>📩</li>
+          <li>📤</li>
+          <li>📥</li>
+          <li>📦</li>
+          <li>📫</li>
+          <li>📪</li>
+          <li>📬</li>
+          <li>📭</li>
+          <li>📮</li>
+          <li>✏</li>
+          <li>✒</li>
+          <li>🖊</li>
+          <li>🖋</li>
+          <li>🖌</li>
+          <li>🖍</li>
+          <li>📝</li>
+
+          <li>💼</li>
+          <li>📁</li>
+          <li>📂</li>
+          <!-- Office -->
+          <li>🗂</li>
+          <li>🗃</li>
+          <li>🗄</li>
+          <li>🗑</li>
+          <li>🗞</li>
+
+          <li>📅</li>
+          <li>📆</li>
+          <li>🗓</li>
+          <li>📇</li>
+          <li>🗳</li>
+
+          <!-- Charts -->
+          <li>📈</li>
+          <li>📉</li>
+          <li>📊</li>
+
+          <!-- Clips -->
+          <li>📋</li>
+          <li>📌</li>
+          <li>📍</li>
+          <li>📎</li>
+          <li>🖇</li>
+          <li>📏</li>
+          <li>📐</li>
+          <li>✂</li>
+          <!-- Keys, locks-->
+          <li>🔒</li>
+          <li>🔓</li>
+          <li>🔏</li>
+          <li>🔐</li>
+          <li>🔑</li>
+          <li>🗝</li>
+
+          <li>🔨</li>
+          <li>⛏</li>
+          <li>🔧</li>
+          <li>🛠</li>
+          <li>⚒</li>
+          <li>🔩</li>
+          <li>🗜</li>
+          <li>🔗</li>
+          <li>⛓</li>
+          <li>💉</li>
+          <li>💊</li>
+          <li>🔫</li>
+          <li>🗡</li>
+          <li>⚔</li>
+          <li>🛡</li>
+          <li>⚰</li>
+          <li>⚱</li>
+          <li>🏺</li>
+          <li>🖼</li>
+          <li>🚬</li>
+          <li>🗿</li>
+        </ul>
+        <h3>Places, travel, weather</h3>
+        <ul>
+          <li>🌏</li>
+          <li>🌍</li>
+          <li>🌎</li>
+          <li>🌐</li>
+          <li>🗺</li>
+ 
+          <li>⛰</li>
+          <li>🏔</li>
+          <li>🌋</li>
+          <li>🗻</li>
+          <li>🏗</li>
+          <li>🏘</li>
+          <li>🏠</li>
+          <li>🏡</li>
+          <li>🏚</li>
+          <li>⛪</li>
+          <li>⛩</li>
+          <li>🏛</li>
+          <li>🕋</li>
+          <li>🕌</li>
+          <li>🕍</li>
+          <li>🏢</li>
+          <li>🏣</li>
+          <li>🏥</li>
+          <li>🏦</li>
+          <li>🏨</li>
+          <li>🏩</li>
+          <li>🏪</li>
+          <li>🏫</li>
+          <li>🏬</li>
+          <li>🏭</li>
+          <li>🏯</li>
+          <li>🏰</li>
+          <li>💒</li>
+ 
+          <li>🏤</li>
+          <li></li>
+ 
+          <li>🗼</li>
+          <li>🗽</li>
+          <li>🗾</li>
+          <li>⛲</li>
+          <li>🏕</li>
+          <li>⛺</li>
+          <li>🌇</li>
+          <li>🏙</li>
+          <li>🌁</li>
+          <li>🌆</li>
+          <li>🌃</li>
+          <li>🌄</li>
+          <li>🌅</li>
+          <li>🌉</li>
+          <li>♨</li>
+          <li>🏖</li>
+          <li>🏜</li>
+          <li>🏝</li>
+          <li>🏞</li>
+          <li>🏟</li>
+          <li>🌌</li>
+          <li>🎠</li>
+          <li>🎡</li>
+          <li>🎢</li>
+          <li>💈</li>
+          <li>🎪</li>
+          <li>🎭</li>
+          <li>🎨</li>
+          <li>🎰</li>
+
+          <li>🚃</li>
+          <li>🚄</li>
+          <li>🚅</li>
+          <li>🚂</li>
+          <li>🚆</li>
+          <li>🚈</li>
+          <li>🚊</li>
+          <li>🚋</li>
+          <li>🚝</li>
+          <li>🚞</li>
+          <li>🚟</li>
+          <li>🚠</li>
+          <li>🚡</li>
+          <li>🚇</li>
+          <li>🚉</li>
+          <li>🛤</li>
+
+          <li>🚌</li>
+          <li>🚏</li>
+          <li>🚑</li>
+          <li>🚒</li>
+          <li>🚓</li>
+          <li>🚕</li>
+          <li>🚗</li>
+          <li>🚙</li>
+          <li>🚚</li>
+          <li>🚍</li>
+          <li>🚎</li>
+          <li>🚐</li>
+          <li>🚔</li>
+          <li>🚖</li>
+          <li>🚘</li>
+          <li>🚛</li>
+          <li>🚜</li>
+          <li>🏎</li>
+          <li>🛣</li>
+ 
+          <li>🚲</li>
+          <li>🏍</li>
+          <li>⛽</li>
+          <li>🛢</li>
+          <li>🚨</li>
+          <li>🚥</li>
+          <li>🚧</li>
+
+          <li>⚓</li>
+          <li>⛵</li>
+          <li>🚣</li>
+          <li>🚤</li>
+          <li>🛥</li>
+          <li>⛴</li>
+          <li>🛳</li>
+          <li>🚢</li>
+
+          <li>🛩</li>
+          <li>✈</li>
+          <li>🛫</li>
+          <li>🛬</li>
+          <li>🚁</li>
+          <li>💺</li>
+          <li>🚀</li>
+          <li>🛰</li>
+
+          <li>🚪</li>
+          <li>🚽</li>
+          <li>🚿</li>
+          <li>🛁</li>
+          <li>🛀</li>
+          <li>🛋</li>
+          <li>🛏</li>
+          <li>🛌</li>
+
+          <li>⌛</li>
+          <li>⏳</li>
+          <li>⌚</li>
+          <li>⏰</li>
+          <li>⏱</li>
+          <li>⏲</li>
+          <li>🕰</li>
+          <li>🕛</li>
+          <li>🕐</li>
+          <li>🕑</li>
+          <li>🕒</li>
+          <li>🕓</li>
+          <li>🕔</li>
+          <li>🕕</li>
+          <li>🕖</li>
+          <li>🕗</li>
+          <li>🕘</li>
+          <li>🕙</li>
+          <li>🕚</li>
+
+          <li>🌖</li>
+          <li>🌗</li>
+          <li>🌘</li>
+          <li>🌑</li>
+          <li>🌒</li>
+          <li>🌓</li>
+          <li>🌔</li>
+          <li>🌕</li>
+          <li>🌙</li>
+          <li>🌛</li>
+          <li>🌜</li>
+          <li>🌝</li>
+          <li>🌚</li>
+
+          <li>🌞</li>
+          <li>🌠</li>
+          <li>☁</li>
+          <li>🌤</li>
+          <li>⛅</li>
+          <li>🌥</li>
+          <li>🌦</li>
+          <li>🌧</li>
+          <li>🌂</li>
+          <li>☂</li>
+          <li>☔</li>
+          <li>⛱</li>
+          <li>🌈</li>
+          <li>🌀</li>
+          <li>🌪</li>
+          <li>🌬</li>
+          <li>⚡</li>
+          <li>🌩</li>
+          <li>⛈</li>
+          <li>🌨</li>
+          <li>❄</li>
+          <li>☃</li>
+          <li>⛄</li>
+          <li>🌫</li>
+          <li>🌊</li>
+          <li>☄</li>
+        </ul>
+        <h3>Generic symbols</h3>
+        <ul>
+          <li>🏳</li>
+          <li>🏴</li>
+          <li>🏁</li>
+          <li>🚩</li>
+          <li>🏧</li>
+          <li>♿</li>
+          <li>🚹</li>
+          <li>🚺</li>
+          <li>🚻</li>
+          <li>🚼</li>
+          <li>🚾</li>
+ 
+          <li>🚮</li>
+          <li>🚯</li>
+          <li>🚰</li>
+          <li>🚱</li>
+          <li>🚳</li>
+          <li>🛂</li>
+          <li>🛃</li>
+          <li>🛄</li>
+          <li>🛅</li>
+          <li>#⃣</li>
+          <li>*⃣</li>
+          <li>☑</li>
+          <li>🚷</li>
+          <li>🚸</li>
+          <li>🕳</li>
+ 
+          <li>⚠</li>
+          <li>⛔</li>
+          <li>🚫</li>
+ 
+          <li>🚦</li>
+ 
+          <li>🚭</li>
+          <li>⬆</li>
+          <li>↗</li>
+          <li>➡</li>
+          <li>↘</li>
+          <li>⬇</li>
+          <li>↙</li>
+          <li>⬅</li>
+          <li>↖</li>
+          <li>↕</li>
+          <li>↔</li>
+          <li>↩</li>
+          <li>↪</li>
+          <li>⤴</li>
+          <li>⤵</li>
+          <li>🔃</li>
+          <li>🔙</li>
+          <li>🔚</li>
+          <li>🔛</li>
+          <li>🔜</li>
+          <li>🔝</li>
+          <li>✡</li>
+          <li>✝</li>
+          <li>🔯</li>
+          <li>📿</li>
+          <li>🕉</li>
+          <li>🕊</li>
+          <li>🛐</li>
+          <li>☦</li>
+          <li>☪</li>
+          <li>☮</li>
+          <li>☯</li>
+          <li>☸</li>
+          <li>♻</li>
+          <li>📛</li>
+          <li>🏷</li>
+          <li>🔰</li>
+          <li>🔱</li>
+          <li>⭕</li>
+          <li>✅</li>
+          <li>✔</li>
+          <li>✖</li>
+          <li>❌</li>
+          <li>❎</li>
+          <li>➕</li>
+          <li>➖</li>
+          <li>➗</li>
+          <li>➰</li>
+          <li>➿</li>
+          <li>〽</li>
+          <li>✳</li>
+          <li>✴</li>
+          <li>❇</li>
+          <li>💱</li>
+          <li>💲</li>
+          <li>〰</li>
+          <li>©</li>
+          <li>®</li>
+          <li>™</li>
+          <li>♈</li>
+          <li>♉</li>
+          <li>♊</li>
+          <li>♋</li>
+          <li>♌</li>
+          <li>♍</li>
+          <li>♎</li>
+          <li>♏</li>
+          <li>♐</li>
+          <li>♑</li>
+          <li>♒</li>
+          <li>♓</li>
+          <li>⛎</li>
+          <li>▶</li>
+          <li>⏩</li>
+          <li>⏭</li>
+          <li>◀</li>
+          <li>⏪</li>
+          <li>⏮</li>
+          <li>🔼</li>
+          <li>⏫</li>
+          <li>🔽</li>
+          <li>⏬</li>
+          <li>⏏</li>
+          <li>⏸</li>
+          <li>⏯</li>
+          <li>⏹</li>
+          <li>⏺</li>
+ 
+          <li>🔀</li>
+          <li>🔁</li>
+          <li>🔂</li>
+          <li>🔄</li>
+          <li>📵</li>
+          <li>🔅</li>
+          <li>🔆</li>
+          <li>🔇</li>
+          <li>🔈</li>
+          <li>🔉</li>
+          <li>🔕</li>
+          <li>⚙</li>
+          <li>🎚</li>
+          <li>🎛</li>
+ 
+          <li>🎦</li>
+          <li>📶</li>
+          <li>📳</li>
+          <li>📴</li>
+          <li>🔟</li>
+          <li>💯</li>
+          <li>🔞</li>
+ 
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+ 
+          <li>🔠</li>
+          <li>🔡</li>
+          <li>🔢</li>
+          <li>🔣</li>
+          <li>🔤</li>
+          <li>🅰</li>
+          <li>🆎</li>
+          <li>🅱</li>
+          <li>🆑</li>
+          <li>🆒</li>
+          <li>🆓</li>
+          <li>ℹ</li>
+          <li>🆔</li>
+          <li>Ⓜ</li>
+          <li>🆕</li>
+          <li>🆖</li>
+          <li>🅾</li>
+          <li>🆗</li>
+          <li>🅿</li>
+          <li>🆘</li>
+          <li>🆙</li>
+          <li>🆚</li>
+          <li>🈁</li>
+          <li>🈂</li>
+          <li>🈷</li>
+          <li>🈶</li>
+          <li>🈯</li>
+          <li>🉐</li>
+          <li>🈹</li>
+          <li>🈚</li>
+          <li>🈲</li>
+          <li>🉑</li>
+          <li>🈸</li>
+          <li>🈴</li>
+          <li>🈳</li>
+          <li>㊗</li>
+          <li>㊙</li>
+          <li>🈺</li>
+          <li>🈵</li>
+          <li>▪</li>
+          <li>▫</li>
+          <li>◻</li>
+          <li>◼</li>
+          <li>◽</li>
+          <li>◾</li>
+          <li>⬛</li>
+          <li>⬜</li>
+          <li>🔶</li>
+          <li>🔷</li>
+          <li>🔸</li>
+          <li>🔹</li>
+          <li>🔺</li>
+          <li>🔻</li>
+          <li>💠</li>
+          <li>🔘</li>
+          <li>🔲</li>
+          <li>🔳</li>
+          <li>⚪</li>
+          <li>⚫</li>
+          <li>🔴</li>
+          <li>🔵</li>
+ 
+          <li>🇦</li>
+          <li>🇧</li>
+          <li>🇨</li>
+          <li>🇩</li>
+          <li>🇪</li>
+          <li>🇫</li>
+          <li>🇬</li>
+          <li>🇭</li>
+          <li>🇮</li>
+          <li>🇯</li>
+          <li>🇰</li>
+          <li>🇱</li>
+          <li>🇲</li>
+          <li>🇳</li>
+          <li>🇴</li>
+          <li>🇵</li>
+          <li>🇶</li>
+          <li>🇷</li>
+          <li>🇸</li>
+          <li>🇹</li>
+          <li>🇺</li>
+          <li>🇻</li>
+          <li>🇼</li>
+          <li>🇽</li>
+          <li>🇾</li>
+          <li>🇿</li>
+ 
+          <li>0⃣</li>
+          <li>1⃣</li>
+          <li>2⃣</li>
+          <li>3⃣</li>
+          <li>4⃣</li>
+          <li>5⃣</li>
+          <li>6⃣</li>
+          <li>7⃣</li>
+          <li>8⃣</li>
+          <li>9⃣</li>
+        </ul>
+      </section>
+    </section>
+
+    <script>
+    var gEditor;
+    var gRecent;
+    var gAll;
+    var gRecentList;
+    var gRecentEmoji;
+    var gCursorPosition = -1;
+
+    var gEditingObserver;
+    var gEditing = false;
+    var gEditingThrottleTimer = null;
+
+    function init() {
+      initPalette();
+
+      gEditor = document.getElementById('editor');
+      gRecent = document.getElementById('recent');
+      gAll = document.getElementById('all');
+
+      gRecentList = document.querySelector('#recent ul');
+      gRecentEmoji = (localStorage.getItem('recent') || '')
+          .split('\n')
+          .filter(function(aEmoji) {
+            return aEmoji.trim() !== '';
+          });
+
+      var lastHeight = localStorage.getItem('editorHeight');
+      if (lastHeight)
+        gEditor.style.height = lastHeight;
+
+      startObserveEditor();
+      updateRecentList();
+      // updateLayout();
+
+      gEditor.focus();
+
+      var lastContent = localStorage.getItem('lastContent');
+      if (lastContent)
+        document.execCommand('insertHTML', false, lastContent.replace(/<\/div[^>]*>/g, ''));
+
+      gEditor.addEventListener('keypress', function(aEvent){
+        if (aEvent.keyCode == aEvent.DOM_VK_TAB &&
+            !aEvent.altKey &&
+            !aEvent.ctrlKey &&
+            !aEvent.metaKey &&
+            !aEvent.shiftKey &&
+            document.execCommand('insertText', false, '\t'))
+          aEvent.preventDefault();
+      });
+
+      gEditor.addEventListener('copy', function(aEvent){
+        var text = rangeToPlainText(window.getSelection().getRangeAt(0));
+        aEvent.clipboardData.setData('text/plain', text);
+        aEvent.preventDefault();
+      });
+      gEditor.addEventListener('cut', function(aEvent){
+        var text = rangeToPlainText(window.getSelection().getRangeAt(0));
+        aEvent.clipboardData.setData('text/plain', text);
+        if (document.execCommand('delete'))
+          aEvent.preventDefault();
+      });
+      gEditor.addEventListener('paste', function(aEvent){
+        aEvent.preventDefault();
+        var text = aEvent.clipboardData.getData('text/plain') || '';
+        var selection = window.getSelection();
+        gEditor.focus();
+        setTimeout(function() {
+          var nextCursorPosition = getCursorPosition() + unicodeStringToChars(text).length;
+          if (document.execCommand('insertText', false, text))
+            gCursorPosition = nextCursorPosition;
+        }, 0);
+      });
+    }
+
+    // window.getSelection().toString() extracts tab character(\u0009)s
+    // as space(\u0020)s if there is any image element, so we need to
+    // construct really selected text with tab characters.
+    function rangeToPlainText(aRange) {
+      // line delimiter is automatically detected by the browser
+      // for each platform.
+      var prettyText = window.getSelection().toString();
+      var linesDelimiter = /(\r?\n)/.test(prettyText) ? RegExp.$1 : '\n';
+
+      var text = '';
+      var target = aRange.startContainer;
+      if (target.nodeType == target.ELEMENT_NODE &&
+          !/^(img|br)$/i.test(target.localName))
+        target = target.childNodes[aRange.startOffset];
+
+      var nodes = getAllEditableNodes();
+      var targetIndex = nodes.indexOf(target);
+      nodes = nodes.slice(targetIndex + 1);
+      while (target)
+      {
+        if (target.nodeType == target.TEXT_NODE) {
+          let value = target.nodeValue;
+          if (target == aRange.endContainer)
+            value = value.slice(0, aRange.endOffset);
+          if (target == aRange.startContainer)
+            value = value.slice(aRange.startOffset);
+          text += value;
+        }
+        else if (target.localName.toUpperCase() == 'BR') {
+          text += linesDelimiter;
+        }
+        else if (target.alt) {
+          text += target.alt;
+        }
+
+        if (target.nodeType == target.TEXT_NODE ?
+              target == aRange.endContainer :
+              target == aRange.endContainer.childNodes[aRange.endOffset - 1])
+          break;
+
+        target = nodes.shift();
+      }
+      return text;
+    }
+
+    function getAllEditableNodes() {
+      var nodes = document.evaluate(
+        'descendant::text() | descendant::*[contains("img,IMG,br,BR", local-name())]',
+        gEditor,
+        null,
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+        null
+      );
+      var array = [];
+      for (var i = 0, maxi = nodes.snapshotLength; i < maxi; i++)
+      {
+        array.push(nodes.snapshotItem(i));
+      }
+      return array;
+    }
+
+    function destroy() {
+      gEditingObserver.disconnect();
+    }
+
+    function emojify(aTarget) {
+      try {
+        var beforeCount = aTarget.querySelectorAll('img.emoji').length;
+        twemoji.parse(aTarget, { size: 72 });
+        setTimeout(function() {
+          var afterCount = aTarget.querySelectorAll('img.emoji').length;
+          if (aTarget == gEditor &&
+              gCursorPosition > -1 &&
+              beforeCount != afterCount &&
+              gCursorPosition != getCursorPosition())
+            setCursorAt(gCursorPosition);
+        }, 0);
+      }
+      catch(e) {
+        console.log('failed to emojify.', e);
+        return false;
+      }
+      return true;
+    }
+
+    function getCursorPosition() {
+      try {
+        var cursor = window.getSelection().getRangeAt(0).cloneRange();
+        cursor.collapse(false);
+        cursor.setStart(getAllEditableNodes()[0], 0);
+        return unicodeStringToChars(rangeToPlainText(cursor)).length;
+      }
+      catch(e) {
+        return -1;
+      }
+    }
+
+    // See: http://qiita.com/YusukeHirao/items/2f0fb8d5bbb981101be0
+    function unicodeStringToChars(aInput) {
+      return aInput.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[^\uD800-\uDFFF]/g) || [];
+    }
+
+    function setCursorAt(aPosition) {
+      try {
+        var nodes = getAllEditableNodes();
+        var target = nodes.shift();
+
+        var selection = window.getSelection();
+        var cursor = document.createRange();
+        cursor.setStart(target, 0);
+        var restCount = aPosition;
+        while (target && restCount > 0)
+        {
+          if (target.nodeType == target.TEXT_NODE) {
+            let value = target.nodeValue;
+            if (value.length >= restCount) {
+              cursor.setEnd(target, restCount);
+              break;
+            }
+            restCount -= unicodeStringToChars(value).length;
+          }
+          else {
+            restCount--;
+          }
+          cursor.setEndAfter(target);
+
+          target = nodes.shift();
+        }
+        cursor.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(cursor);
+      }
+      catch(e) {
+        console.log('failed to move cursor: ', e);
+      }
+    }
+
+    function startObserveEditor() {
+      gEditingObserver = new MutationObserver(function(aMutations) {
+        if (gEditing)
+          return;
+        aMutations.forEach(function(aMutation) {
+          if (aMutation.type == 'attributes') {
+            if (aMutation.attributeName == 'style')
+              updateLayout();
+          }
+          else {
+            if (gEditingThrottleTimer)
+              clearTimeout(gEditingThrottleTimer);
+            gEditingThrottleTimer = setTimeout(function() {
+              gEditingThrottleTimer = null;
+              gEditing = true;
+
+              localStorage.setItem('lastContent', gEditor.innerHTML);
+
+              if (gEditor.textContent.trim() == '' &&
+                  !gEditor.querySelector('img'))
+                gEditor.setAttribute('data-blank', 'true');
+              else
+                gEditor.removeAttribute('data-blank');
+
+              emojify(gEditor);
+
+              setTimeout(function() {
+                gEditing = false;
+              }, 10);
+            }, 250);
+          }
+        });
+      });
+      gEditingObserver.observe(gEditor, {
+        attributes    : true,
+        childList     : true,
+        characterData : true,
+        subtree       : true
+      });
+    }
+
+    function updateLayout() {
+      var topMargin = gEditor.clientHeight + 10 /* margin */;
+      gRecent.style.top = topMargin + 'px';
+      var recentItemsHeight = gRecent.querySelector('ul').clientHeight;
+      gRecent.style.height = recentItemsHeight + 'px';
+
+      gAll.style.top = (topMargin + gRecent.clientHeight) + 'px';
+
+      var height = window.getComputedStyle(gEditor, null).getPropertyValue('height');
+      localStorage.setItem('editorHeight', height);
+    }
+
+    function insertEmoji(aEvent) {
+      var target = aEvent.target;
+      while (target.nodeType != target.ELEMENT_NODE)
+        target = target.parentNode;
+
+      if (String(target.localName).toUpperCase() != 'IMG' &&
+          target.className != 'emoji')
+        return;
+
+      var emoji = target.alt || target.textContent;
+      gEditor.focus();
+      setTimeout(function() { // do after focused
+        gCursorPosition = getCursorPosition() + 1;
+        document.execCommand('insertText', false, emoji);
+        addRecentEmoji(emoji);
+      }, 0);
+    }
+
+    function addRecentEmoji(aEmoji) {
+      var index = gRecentEmoji.indexOf(aEmoji);
+      if (index > -1)
+        gRecentEmoji.splice(index, 1);
+      gRecentEmoji.unshift(aEmoji);
+      gRecentEmoji = gRecentEmoji.slice(0, 25);
+      updateRecentList();
+      localStorage.setItem('recent', gRecentEmoji.join('\n'));
+    }
+
+    function updateRecentList() {
+      var range = document.createRange();
+      range.selectNodeContents(gRecentList);
+      range.deleteContents();
+      range.detach();
+
+      gRecentEmoji.forEach(function(aEmoji) {
+        var item = document.createElement('li');
+        item.className = 'emoji';
+        item.appendChild(document.createTextNode(aEmoji));
+        gRecentList.appendChild(item);
+      });
+      emojify(gRecentList);
+
+      updateLayout();
+    }
+
+    function initPalette() {
+      var palette = document.getElementById('emoji-palette');
+      var emojified = emojify(palette);
+      for (let item of palette.querySelectorAll('li'))
+      {
+        item.className = 'emoji';
+        if (emojified &&
+            item.firstChild &&
+            item.firstChild.nodeType == Node.TEXT_NODE)
+          item.style.display = 'none';
+      }
+    }
+
+    if (location.protocol != 'file:') {
+      let script = document.createElement('script');
+      script.setAttribute('src', '//twemoji.maxcdn.com/2/twemoji.min.js?2.2.2');
+      document.body.appendChild(script);
+    }
+    </script>
+  </body>
+</html>
