@@ -24,4 +24,4 @@ If you deploy the file to the Web, twemoji will be loaded automatically and all 
 ## Known issues
 
  * There is no "Save" and "Load" feature. You need to copy/paste the constructed emoji text between something text editor which support  UTF-8 (atom, sublime, or something).
- * On Google Chrome, it fails to calculate the position of hte cursor. This problem is caused by undocumented behavior around `contenteditable="true"` on Chrome.
+ * On Google Chrome, it fails to calculate the position of hte cursor, so the cursor can go away if you insert Unicode emoji characters directly from IME or others. This problem is caused by undocumented behavior around `contenteditable="true"` on Chrome.
