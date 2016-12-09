@@ -31,13 +31,13 @@
       width: 36px;
       height: 36px;
       display: inline-block;
-      padding: 2px;
-      margin: 4px;
+      padding: 6px;
+      margin: 0;
     }
     img.emoji {
       height: 1em;
       width: 1em;
-      margin: 0 .05em 0 .1em;
+      margin: 0;
       vertical-align: -0.1em;
     }
     h1, h2 {
@@ -1661,6 +1661,22 @@
             item.firstChild &&
             item.firstChild.nodeType == Node.TEXT_NODE)
           item.style.display = 'none';
+      }
+
+      var maybeWhitespaces = document.evaluate(
+        'descendant::text()',
+        palette,
+        null,
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+        null
+      );
+      for (let i = 0, maxi = maybeWhitespaces.snapshotLength;
+           i < maxi;
+           i++)
+      {
+        let space = maybeWhitespaces.snapshotItem(i);
+        if (space.nodeValue.trim() == '')
+          space.parentNode.removeChild(space);
       }
     }
 
