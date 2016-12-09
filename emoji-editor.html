@@ -1410,13 +1410,19 @@
         var text = aEvent.clipboardData.getData('text/plain') || '';
         var command = 'insertText';
         if ('twemoji' in window) {
-          text = twemoji.parse(text);
+          text = twemoji.parse(sanitizeForHTML(text));
           command = 'insertHTML';
         }
         gEditor.focus();
         if (document.execCommand(command, false, text))
           aEvent.preventDefault();
       });
+    }
+
+    function sanitizeForHTML(aInput) {
+      return aInput.replace(/&/g, '&amp;')
+                   .replace(/>/g, '&lt;')
+                   .replace(/</g, '&lt;');
     }
 
     // window.getSelection().toString() extracts tab character(\u0009)s
