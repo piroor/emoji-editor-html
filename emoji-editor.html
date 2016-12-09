@@ -1407,15 +1407,15 @@
           aEvent.preventDefault();
       });
       gEditor.addEventListener('paste', function(aEvent){
-        aEvent.preventDefault();
         var text = aEvent.clipboardData.getData('text/plain') || '';
-        var selection = window.getSelection();
+        var command = 'insertText';
+        if ('twemoji' in window) {
+          text = twemoji.parse(text);
+          command = 'insertHTML';
+        }
         gEditor.focus();
-        setTimeout(function() {
-          var nextCursorPosition = getCursorPosition() + unicodeStringToChars(text).length;
-          if (document.execCommand('insertText', false, text))
-            gCursorPosition = nextCursorPosition;
-        }, 0);
+        if (document.execCommand(command, false, text))
+          aEvent.preventDefault();
       });
     }
 
@@ -1619,10 +1619,16 @@
         return;
 
       var emoji = target.alt || target.textContent;
+
+      var text = emoji;
+      var command = 'insertText';
+      if ('twemoji' in window) {
+        text = twemoji.parse(text);
+        command = 'insertHTML';
+      }
       gEditor.focus();
       setTimeout(function() { // do after focused
-        gCursorPosition = getCursorPosition() + 1;
-        document.execCommand('insertText', false, emoji);
+        document.execCommand(command, false, text);
         addRecentEmoji(emoji);
       }, 0);
     }
@@ -1646,10 +1652,14 @@
       gRecentEmoji.forEach(function(aEmoji) {
         var item = document.createElement('li');
         item.className = 'emoji';
-        item.appendChild(document.createTextNode(aEmoji));
+        if ('twemoji' in window) {
+          item.innerHTML = twemoji.parse(aEmoji);
+        }
+        else {
+          item.appendChild(document.createTextNode(aEmoji));
+        }
         gRecentList.appendChild(item);
       });
-      emojify(gRecentList);
 
       updateLayout();
     }
