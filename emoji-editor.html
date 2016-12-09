@@ -1485,22 +1485,20 @@
     }
 
     function emojify(aTarget) {
-      try {
-        var beforeCount = aTarget.querySelectorAll('img.emoji').length;
-        twemoji.parse(aTarget, { size: 72 });
-        setTimeout(function() {
-          var afterCount = aTarget.querySelectorAll('img.emoji').length;
-          if (aTarget == gEditor &&
-              gCursorPosition > -1 &&
-              beforeCount != afterCount &&
-              gCursorPosition != getCursorPosition())
-            setCursorAt(gCursorPosition);
-        }, 0);
-      }
-      catch(e) {
-        console.log('failed to emojify.', e);
+      if (!('twemoji' in window))
         return false;
-      }
+
+      var beforeCount = aTarget.querySelectorAll('img.emoji').length;
+      gCursorPosition = getCursorPosition();
+      twemoji.parse(aTarget, { size: 72 });
+      setTimeout(function() {
+        var afterCount = aTarget.querySelectorAll('img.emoji').length;
+        if (aTarget == gEditor &&
+            gCursorPosition > -1 &&
+            beforeCount != afterCount &&
+            gCursorPosition != getCursorPosition())
+          setCursorAt(gCursorPosition);
+      }, 0);
       return true;
     }
 
