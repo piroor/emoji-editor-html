@@ -1616,7 +1616,7 @@
           target.className != 'emoji')
         return;
 
-      var emoji = target.alt || target.textContent;
+      var emoji = target.alt || target.getAttribute('data-emoji');
 
       var text = emoji;
       var command = 'insertText';
@@ -1670,8 +1670,12 @@
         item.className = 'emoji';
         if (emojified &&
             item.firstChild &&
-            item.firstChild.nodeType == Node.TEXT_NODE)
+            item.firstChild.nodeType == Node.TEXT_NODE) {
           item.style.display = 'none';
+        }
+        else {
+          item.setAttribute('data-emoji', item.firstChild.alt);
+        }
       }
 
       var maybeWhitespaces = document.evaluate(
