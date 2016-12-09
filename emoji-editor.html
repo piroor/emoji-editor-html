@@ -1668,9 +1668,9 @@
       for (let item of palette.querySelectorAll('li'))
       {
         item.className = 'emoji';
-        if (emojified &&
-            item.firstChild &&
-            item.firstChild.nodeType == Node.TEXT_NODE) {
+        if (!emojified || !item.firstChild)
+          continue;
+        if (item.firstChild.nodeType == Node.TEXT_NODE) {
           item.style.display = 'none';
         }
         else {
