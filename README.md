@@ -12,9 +12,10 @@ Here is the list of depending technologies:
 * HTML5
 * `copy`, `cut`, and `paste` DOM events
 * `delete`, `insertHTML`, and `insertText` commands for `document.execCommand()`
-* DOM3 XPath
 * MutationObserver
+* Generator
 * localStorage
+* DOM3 XPath
 
 ## How to use
 

@@ -1440,11 +1440,16 @@
           !/^(img|br)$/i.test(target.localName))
         target = target.childNodes[aRange.startOffset];
 
-      var nodes = getAllEditableNodes();
-      var targetIndex = nodes.indexOf(target);
-      nodes = nodes.slice(targetIndex + 1);
-      while (target)
+      var targets = editableNodes();
+      var initialTarget = target;
+      for (target of targets)
       {
+        if (initialTarget) {
+          if (target != initialTarget)
+            continue;
+          initialTarget = null;
+        }
+
         if (target.nodeType == target.TEXT_NODE) {
           let value = target.nodeValue;
           if (target == aRange.endContainer)
@@ -1464,13 +1469,11 @@
               target == aRange.endContainer :
               target == aRange.endContainer.childNodes[aRange.endOffset - 1])
           break;
-
-        target = nodes.shift();
       }
       return text;
     }
 
-    function getAllEditableNodes() {
+    function editableNodes() {
       var nodes = document.evaluate(
         'descendant::text() | descendant::*[contains("img,IMG,br,BR", local-name())]',
         gEditor,
@@ -1478,12 +1481,13 @@
         XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
         null
       );
-      var array = [];
-      for (var i = 0, maxi = nodes.snapshotLength; i < maxi; i++)
-      {
-        array.push(nodes.snapshotItem(i));
-      }
-      return array;
+      return (function* () {
+        for (var i = 0, maxi = nodes.snapshotLength; i < maxi; i++)
+        {
+          yield nodes.snapshotItem(i);
+        }
+        yield null;
+      })();
     }
 
     function destroy() {
@@ -1513,7 +1517,8 @@
       try {
         var cursor = window.getSelection().getRangeAt(0).cloneRange();
         cursor.collapse(false);
-        cursor.setStart(getAllEditableNodes()[0], 0);
+        var firstEditable = editableNodes().next().value;
+        cursor.setStart(firstEditable, 0);
         return unicodeStringToChars(rangeToPlainText(cursor)).length;
       }
       catch(e) {
@@ -1528,8 +1533,8 @@
 
     function setCursorAt(aPosition) {
       try {
-        var nodes = getAllEditableNodes();
-        var target = nodes.shift();
+        var targets = editableNodes();
+        var target = targets.next().value;
 
         var selection = window.getSelection();
         var cursor = document.createRange();
@@ -1550,7 +1555,7 @@
           }
           cursor.setEndAfter(target);
 
-          target = nodes.shift();
+          target = targets.next().value;
         }
         cursor.collapse(false);
         selection.removeAllRanges();
