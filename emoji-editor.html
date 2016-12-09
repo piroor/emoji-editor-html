@@ -1417,6 +1417,14 @@
         if (document.execCommand(command, false, text))
           aEvent.preventDefault();
       });
+
+      gEditor.addEventListener('compositionstart', function(aEvent){
+        gEditing = true;
+      });
+      gEditor.addEventListener('compositionend', function(aEvent){
+        gEditing = false;
+        onEdit();
+      });
     }
 
     function sanitizeForHTML(aInput) {
@@ -1575,26 +1583,7 @@
               updateLayout();
           }
           else {
-            if (gEditingThrottleTimer)
-              clearTimeout(gEditingThrottleTimer);
-            gEditingThrottleTimer = setTimeout(function() {
-              gEditingThrottleTimer = null;
-              gEditing = true;
-
-              localStorage.setItem('lastContent', gEditor.innerHTML);
-
-              if (gEditor.textContent.trim() == '' &&
-                  !gEditor.querySelector('img'))
-                gEditor.setAttribute('data-blank', 'true');
-              else
-                gEditor.removeAttribute('data-blank');
-
-              emojify(gEditor);
-
-              setTimeout(function() {
-                gEditing = false;
-              }, 10);
-            }, 250);
+            onEdit();
           }
         });
       });
@@ -1604,6 +1593,29 @@
         characterData : true,
         subtree       : true
       });
+    }
+
+    function onEdit() {
+      if (gEditingThrottleTimer)
+        clearTimeout(gEditingThrottleTimer);
+      gEditingThrottleTimer = setTimeout(function() {
+        gEditingThrottleTimer = null;
+        gEditing = true;
+
+        localStorage.setItem('lastContent', gEditor.innerHTML);
+
+        if (gEditor.textContent.trim() == '' &&
+            !gEditor.querySelector('img'))
+          gEditor.setAttribute('data-blank', 'true');
+        else
+          gEditor.removeAttribute('data-blank');
+
+        emojify(gEditor);
+
+        setTimeout(function() {
+          gEditing = false;
+        }, 10);
+      }, 250);
     }
 
     function updateLayout() {
