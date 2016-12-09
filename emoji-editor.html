@@ -1481,7 +1481,8 @@
     }
 
     function destroy() {
-      gEditingObserver.disconnect();
+      if (gEditingObserver)
+        gEditingObserver.disconnect();
     }
 
     function emojify(aTarget) {
