@@ -1806,6 +1806,7 @@
       gRecentEmoji.forEach(function(aEmoji) {
         var item = document.createElement('li');
         item.className = 'emoji';
+        item.setAttribute('data-emoji', aEmoji);
         if ('twemoji' in window) {
           item.innerHTML = twemoji.parse(aEmoji);
         }
