@@ -1351,6 +1351,11 @@
     </section>
 
     <script>
+
+    //===============================================================
+    // Initialization
+    //===============================================================
+
     var gEditor;
     var gRecent;
     var gAll;
@@ -1403,106 +1408,11 @@
           aEvent.preventDefault();
       });
 
-      gEditor.addEventListener('copy', function(aEvent){
-        var text = rangeToPlainText(window.getSelection().getRangeAt(0));
-        aEvent.clipboardData.setData('text/plain', text);
-        aEvent.preventDefault();
-      });
-      gEditor.addEventListener('cut', function(aEvent){
-        var text = rangeToPlainText(window.getSelection().getRangeAt(0));
-        aEvent.clipboardData.setData('text/plain', text);
-        if (document.execCommand('delete'))
-          aEvent.preventDefault();
-      });
-      gEditor.addEventListener('paste', function(aEvent){
-        var text = aEvent.clipboardData.getData('text/plain') || '';
-        var command = 'insertText';
-        if ('twemoji' in window) {
-          text = twemoji.parse(sanitizeForHTML(text));
-          command = 'insertHTML';
-        }
-        gEditor.focus();
-        if (document.execCommand(command, false, text))
-          aEvent.preventDefault();
-      });
-
-      gEditor.addEventListener('compositionstart', function(aEvent){
-        gEditing = true;
-      });
-      gEditor.addEventListener('compositionend', function(aEvent){
-        gEditing = false;
-        onEdit();
-      });
-    }
-
-    function sanitizeForHTML(aInput) {
-      return aInput.replace(/&/g, '&amp;')
-                   .replace(/>/g, '&gt;')
-                   .replace(/</g, '&lt;');
-    }
-
-    // window.getSelection().toString() extracts tab character(\u0009)s
-    // as space(\u0020)s if there is any image element, so we need to
-    // construct really selected text with tab characters.
-    function rangeToPlainText(aRange) {
-      // line delimiter is automatically detected by the browser
-      // for each platform.
-      var prettyText = window.getSelection().toString();
-      var linesDelimiter = /(\r?\n)/.test(prettyText) ? RegExp.$1 : '\n';
-
-      var text = '';
-      var target = aRange.startContainer;
-      if (target.nodeType == target.ELEMENT_NODE &&
-          !/^(img|br)$/i.test(target.localName))
-        target = target.childNodes[aRange.startOffset];
-
-      var targets = editableNodes();
-      var initialTarget = target;
-      for (target of targets)
-      {
-        if (initialTarget) {
-          if (target != initialTarget)
-            continue;
-          initialTarget = null;
-        }
-
-        if (target.nodeType == target.TEXT_NODE) {
-          let value = target.nodeValue;
-          if (target == aRange.endContainer)
-            value = value.slice(0, aRange.endOffset);
-          if (target == aRange.startContainer)
-            value = value.slice(aRange.startOffset);
-          text += value;
-        }
-        else if (target.localName.toUpperCase() == 'BR') {
-          text += linesDelimiter;
-        }
-        else if (target.alt) {
-          text += target.alt;
-        }
-
-        if (target.nodeType == target.TEXT_NODE ?
-              target == aRange.endContainer :
-              target == aRange.endContainer.childNodes[aRange.endOffset - 1])
-          break;
-      }
-      return text;
-    }
-
-    function editableNodes() {
-      var nodes = document.evaluate(
-        'descendant::text() | descendant::*[contains("img,IMG,br,BR", local-name())]',
-        gEditor,
-        null,
-        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-        null
-      );
-      return (function* () {
-        for (var i = 0, maxi = nodes.snapshotLength; i < maxi; i++)
-        {
-          yield nodes.snapshotItem(i);
-        }
-      })();
+      gEditor.addEventListener('copy', onCopy);
+      gEditor.addEventListener('cut', onCut);
+      gEditor.addEventListener('paste', onPaste);
+      gEditor.addEventListener('compositionstart', onCompositionStart);
+      gEditor.addEventListener('compositionend', onCompositionEnd);
     }
 
     function destroy() {
@@ -1510,76 +1420,10 @@
         gEditingObserver.disconnect();
     }
 
-    function emojify(aTarget) {
-      if (!('twemoji' in window))
-        return false;
 
-      var beforeCount = aTarget.querySelectorAll('img.emoji').length;
-      gCursorPosition = getCursorPosition();
-      twemoji.parse(aTarget, { size: 72 });
-      setTimeout(function() {
-        var afterCount = aTarget.querySelectorAll('img.emoji').length;
-        if (aTarget == gEditor &&
-            gCursorPosition > -1 &&
-            beforeCount != afterCount &&
-            gCursorPosition != getCursorPosition())
-          setCursorAt(gCursorPosition);
-      }, 0);
-      return true;
-    }
-
-    function getCursorPosition() {
-      try {
-        var cursor = window.getSelection().getRangeAt(0).cloneRange();
-        cursor.collapse(false);
-        var firstEditable = editableNodes().next().value;
-        cursor.setStart(firstEditable, 0);
-        return unicodeStringToChars(rangeToPlainText(cursor)).length;
-      }
-      catch(e) {
-        return -1;
-      }
-    }
-
-    // See: http://qiita.com/YusukeHirao/items/2f0fb8d5bbb981101be0
-    function unicodeStringToChars(aInput) {
-      return aInput.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[^\uD800-\uDFFF]/g) || [];
-    }
-
-    function setCursorAt(aPosition) {
-      try {
-        var targets = editableNodes();
-        var target = targets.next().value;
-
-        var selection = window.getSelection();
-        var cursor = document.createRange();
-        cursor.setStart(target, 0);
-        var restCount = aPosition;
-        while (target && restCount > 0)
-        {
-          if (target.nodeType == target.TEXT_NODE) {
-            let value = target.nodeValue;
-            if (value.length >= restCount) {
-              cursor.setEnd(target, restCount);
-              break;
-            }
-            restCount -= unicodeStringToChars(value).length;
-          }
-          else {
-            restCount--;
-          }
-          cursor.setEndAfter(target);
-
-          target = targets.next().value;
-        }
-        cursor.collapse(false);
-        selection.removeAllRanges();
-        selection.addRange(cursor);
-      }
-      catch(e) {
-        console.log('failed to move cursor: ', e);
-      }
-    }
+    //===============================================================
+    // Event Handling
+    //===============================================================
 
     function startObserveEditor() {
       gEditingObserver = new MutationObserver(function(aMutations) {
@@ -1601,6 +1445,40 @@
         characterData : true,
         subtree       : true
       });
+    }
+
+    function onCopy(aEvent) {
+      var text = rangeToPlainText(window.getSelection().getRangeAt(0));
+      aEvent.clipboardData.setData('text/plain', text);
+      aEvent.preventDefault();
+    }
+
+    function onCut(aEvent) {
+      var text = rangeToPlainText(window.getSelection().getRangeAt(0));
+      aEvent.clipboardData.setData('text/plain', text);
+      if (document.execCommand('delete'))
+        aEvent.preventDefault();
+    }
+
+    function onPaste(aEvent) {
+      var text = aEvent.clipboardData.getData('text/plain') || '';
+      var command = 'insertText';
+      if ('twemoji' in window) {
+        text = twemoji.parse(sanitizeForHTML(text));
+        command = 'insertHTML';
+      }
+      gEditor.focus();
+      if (document.execCommand(command, false, text))
+        aEvent.preventDefault();
+    }
+
+    function onCompositionStart() {
+      gEditing = true;
+    }
+
+    function onCompositionEnd() {
+      gEditing = false;
+      onEdit();
     }
 
     function onEdit() {
@@ -1626,28 +1504,6 @@
           gEditing = false;
         }, 10);
       }, 250);
-    }
-
-    function updateLayout() {
-      var topMargin = gEditor.clientHeight + 10 /* margin */;
-      gRecent.style.top = topMargin + 'px';
-      var recentItemsHeight = gRecent.querySelector('ul').clientHeight;
-      gRecent.style.height = recentItemsHeight + 'px';
-
-      gAll.style.top = (topMargin + gRecent.clientHeight) + 'px';
-
-      var height = window.getComputedStyle(gEditor, null).getPropertyValue('height');
-      localStorage.setItem('editorHeight', height);
-    }
-
-    function getEmojiItemFromEvent(aEvent) {
-      return document.evaluate(
-        'ancestor-or-self::*[contains("li,LI", local-name())][contains(@class, "emoji")]',
-        aEvent.target,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-      ).singleNodeValue;
     }
 
     function onMouseDown(aEvent) {
@@ -1703,16 +1559,194 @@
       gEditor.focus();
     }
 
+    function onClick(aEvent) {
+      if (!gLongPressProcessed)
+        insertEmoji(aEvent)
+    }
+
+
+    //===============================================================
+    // Text Utilities
+    //===============================================================
+
+    function sanitizeForHTML(aInput) {
+      return aInput.replace(/&/g, '&amp;')
+                   .replace(/>/g, '&gt;')
+                   .replace(/</g, '&lt;');
+    }
+
+    // See: http://qiita.com/YusukeHirao/items/2f0fb8d5bbb981101be0
+    function unicodeStringToChars(aInput) {
+      return aInput.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[^\uD800-\uDFFF]/g) || [];
+    }
+
+
+    //===============================================================
+    // Range Utilities
+    //===============================================================
+
+    // window.getSelection().toString() extracts tab character(\u0009)s
+    // as space(\u0020)s if there is any image element, so we need to
+    // construct really selected text with tab characters.
+    function rangeToPlainText(aRange) {
+      // line delimiter is automatically detected by the browser
+      // for each platform.
+      var prettyText = window.getSelection().toString();
+      var linesDelimiter = /(\r?\n)/.test(prettyText) ? RegExp.$1 : '\n';
+
+      var text = '';
+      var target = aRange.startContainer;
+      if (target.nodeType == target.ELEMENT_NODE &&
+          !/^(img|br)$/i.test(target.localName))
+        target = target.childNodes[aRange.startOffset];
+
+      var targets = editableNodes();
+      var initialTarget = target;
+      for (target of targets)
+      {
+        if (initialTarget) {
+          if (target != initialTarget)
+            continue;
+          initialTarget = null;
+        }
+
+        if (target.nodeType == target.TEXT_NODE) {
+          let value = target.nodeValue;
+          if (target == aRange.endContainer)
+            value = value.slice(0, aRange.endOffset);
+          if (target == aRange.startContainer)
+            value = value.slice(aRange.startOffset);
+          text += value;
+        }
+        else if (target.localName.toUpperCase() == 'BR') {
+          text += linesDelimiter;
+        }
+        else if (target.alt) {
+          text += target.alt;
+        }
+
+        if (target.nodeType == target.TEXT_NODE ?
+              target == aRange.endContainer :
+              target == aRange.endContainer.childNodes[aRange.endOffset - 1])
+          break;
+      }
+      return text;
+    }
+
+    function getCursorPosition() {
+      try {
+        var cursor = window.getSelection().getRangeAt(0).cloneRange();
+        cursor.collapse(false);
+        var firstEditable = editableNodes().next().value;
+        cursor.setStart(firstEditable, 0);
+        return unicodeStringToChars(rangeToPlainText(cursor)).length;
+      }
+      catch(e) {
+        return -1;
+      }
+    }
+
+    function setCursorAt(aPosition) {
+      try {
+        var targets = editableNodes();
+        var target = targets.next().value;
+
+        var selection = window.getSelection();
+        var cursor = document.createRange();
+        cursor.setStart(target, 0);
+        var restCount = aPosition;
+        while (target && restCount > 0)
+        {
+          if (target.nodeType == target.TEXT_NODE) {
+            let value = target.nodeValue;
+            if (value.length >= restCount) {
+              cursor.setEnd(target, restCount);
+              break;
+            }
+            restCount -= unicodeStringToChars(value).length;
+          }
+          else {
+            restCount--;
+          }
+          cursor.setEndAfter(target);
+
+          target = targets.next().value;
+        }
+        cursor.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(cursor);
+      }
+      catch(e) {
+        console.log('failed to move cursor: ', e);
+      }
+    }
+
+    function editableNodes() {
+      var nodes = document.evaluate(
+        'descendant::text() | descendant::*[contains("img,IMG,br,BR", local-name())]',
+        gEditor,
+        null,
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+        null
+      );
+      return (function* () {
+        for (var i = 0, maxi = nodes.snapshotLength; i < maxi; i++)
+        {
+          yield nodes.snapshotItem(i);
+        }
+      })();
+    }
+
+
+    //===============================================================
+    // Palette and UI
+    //===============================================================
+
+    function emojify(aTarget) {
+      if (!('twemoji' in window))
+        return false;
+
+      var beforeCount = aTarget.querySelectorAll('img.emoji').length;
+      gCursorPosition = getCursorPosition();
+      twemoji.parse(aTarget, { size: 72 });
+      setTimeout(function() {
+        var afterCount = aTarget.querySelectorAll('img.emoji').length;
+        if (aTarget == gEditor &&
+            gCursorPosition > -1 &&
+            beforeCount != afterCount &&
+            gCursorPosition != getCursorPosition())
+          setCursorAt(gCursorPosition);
+      }, 0);
+      return true;
+    }
+
+    function getEmojiItemFromEvent(aEvent) {
+      return document.evaluate(
+        'ancestor-or-self::*[contains("li,LI", local-name())][contains(@class, "emoji")]',
+        aEvent.target,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+      ).singleNodeValue;
+    }
+
+    function updateLayout() {
+      var topMargin = gEditor.clientHeight + 10 /* margin */;
+      gRecent.style.top = topMargin + 'px';
+      var recentItemsHeight = gRecent.querySelector('ul').clientHeight;
+      gRecent.style.height = recentItemsHeight + 'px';
+
+      gAll.style.top = (topMargin + gRecent.clientHeight) + 'px';
+
+      var height = window.getComputedStyle(gEditor, null).getPropertyValue('height');
+      localStorage.setItem('editorHeight', height);
+    }
+
     function clearCopyMark() {
       var items = document.querySelectorAll('li[data-ready-to-copy="true"]');
       for (let item of items) {
         item.removeAttribute('data-ready-to-copy');
       }
-    }
-
-    function onClick(aEvent) {
-      if (!gLongPressProcessed)
-        insertEmoji(aEvent)
     }
 
     function insertEmoji(aEvent) {
