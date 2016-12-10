@@ -1404,16 +1404,7 @@
       if (lastContent)
         gEditor.innerHTML = lastContent.replace(/<\/div[^>]*>/g, '');
 
-      gEditor.addEventListener('keypress', function(aEvent){
-        if (aEvent.keyCode == aEvent.DOM_VK_TAB &&
-            !aEvent.altKey &&
-            !aEvent.ctrlKey &&
-            !aEvent.metaKey &&
-            !aEvent.shiftKey &&
-            document.execCommand('insertText', false, '\t'))
-          aEvent.preventDefault();
-      });
-
+      gEditor.addEventListener('keypress', onKeyPress);
       gEditor.addEventListener('copy', onCopy);
       gEditor.addEventListener('cut', onCut);
       gEditor.addEventListener('paste', onPaste);
@@ -1464,6 +1455,16 @@
 
     function onResize() {
       updateLayout();
+    }
+
+    function onKeyPress(aEvent) {
+      if (aEvent.keyCode == aEvent.DOM_VK_TAB &&
+          !aEvent.altKey &&
+          !aEvent.ctrlKey &&
+          !aEvent.metaKey &&
+          !aEvent.shiftKey &&
+          document.execCommand('insertText', false, '\t'))
+        aEvent.preventDefault();
     }
 
     function onCopy(aEvent) {
