@@ -86,18 +86,13 @@
     </style>
     <!--script src="./twemoji.min.js"></script-->
   </head>
-  <body onload="init();"
-        onunload="destroy();"
-        onresize="updateLayout();">
+  <body>
     <h1>Simple Text Editor with Twitter Emoji (Twemoji)</h1>
     <div id="editor"
          contenteditable="true"
          data-placeholder="Input text including Emoji here."
          data-blank="true"></div>
-    <section id="emoji-palette"
-             onclick="onClick(event);"
-             onmousedown="onMouseDown(event);"
-             onmouseup="onMouseUp(event);">
+    <section id="emoji-palette">
       <h2>Available Emoji</h2>
       <section id="recent">
         <h3>Recent</h3>
@@ -1370,7 +1365,18 @@
     var gEditing = false;
     var gEditingThrottleTimer = null;
 
-    function init() {
+    window.addEventListener('load', onLoad);
+
+
+    //===============================================================
+    // Event Handling
+    //===============================================================
+
+    function onLoad() {
+      window.removeEventListener('load', onLoad);
+      window.addEventListener('unload', onUnload);
+      window.addEventListener('resize', onResize);
+
       initPalette();
 
       gEditor = document.getElementById('editor');
@@ -1415,15 +1421,24 @@
       gEditor.addEventListener('compositionend', onCompositionEnd);
     }
 
-    function destroy() {
+    function onUnload() {
+      window.addEventListener('unload', onUnload);
+      window.addEventListener('resize', onResize);
+
+      gEditor.addEventListener('copy', onCopy);
+      gEditor.addEventListener('cut', onCut);
+      gEditor.addEventListener('paste', onPaste);
+      gEditor.addEventListener('compositionstart', onCompositionStart);
+      gEditor.addEventListener('compositionend', onCompositionEnd);
+
+      var palette = document.getElementById('emoji-palette');
+      palette.addEventListener('click', onClick);
+      palette.addEventListener('mousedown', onMouseDown);
+      palette.addEventListener('mouseup', onMouseUp);
+
       if (gEditingObserver)
         gEditingObserver.disconnect();
     }
-
-
-    //===============================================================
-    // Event Handling
-    //===============================================================
 
     function startObserveEditor() {
       gEditingObserver = new MutationObserver(function(aMutations) {
@@ -1445,6 +1460,10 @@
         characterData : true,
         subtree       : true
       });
+    }
+
+    function onResize() {
+      updateLayout();
     }
 
     function onCopy(aEvent) {
@@ -1831,6 +1850,10 @@
         if (space.nodeValue.trim() == '')
           space.parentNode.removeChild(space);
       }
+
+      palette.addEventListener('click', onClick);
+      palette.addEventListener('mousedown', onMouseDown);
+      palette.addEventListener('mouseup', onMouseUp);
     }
 
     if (location.protocol != 'file:') {
