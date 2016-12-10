@@ -34,6 +34,9 @@
       padding: 6px 8px;
       margin: 0;
     }
+    li.emoji[data-ready-to-copy="true"] {
+      background: highlight;
+    }
     img.emoji {
       height: 1em;
       width: 1em;
@@ -92,7 +95,9 @@
          data-placeholder="Input text including Emoji here."
          data-blank="true"></div>
     <section id="emoji-palette"
-             onclick="insertEmoji(event);">
+             onclick="onClick(event);"
+             onmousedown="onMouseDown(event);"
+             onmouseup="onMouseUp(event);">
       <h2>Available Emoji</h2>
       <section id="recent">
         <h3>Recent</h3>
@@ -1352,6 +1357,9 @@
     var gRecentList;
     var gRecentEmoji;
     var gCursorPosition = -1;
+    var gLongPressSeconds = 1;
+    var gLongPressTimer = null;
+    var gLongPressProcessed = false;
 
     var gEditingObserver;
     var gEditing = false;
@@ -1596,6 +1604,8 @@
     }
 
     function onEdit() {
+      clearCopyMark();
+
       if (gEditingThrottleTimer)
         clearTimeout(gEditingThrottleTimer);
       gEditingThrottleTimer = setTimeout(function() {
@@ -1630,17 +1640,87 @@
       localStorage.setItem('editorHeight', height);
     }
 
-    function insertEmoji(aEvent) {
-      var target = aEvent.target;
-      while (target.nodeType != target.ELEMENT_NODE)
-        target = target.parentNode;
+    function getEmojiItemFromEvent(aEvent) {
+      return document.evaluate(
+        'ancestor-or-self::*[contains("li,LI", local-name())][contains(@class, "emoji")]',
+        aEvent.target,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+      ).singleNodeValue;
+    }
 
-      if (String(target.localName).toUpperCase() != 'IMG' &&
-          target.className != 'emoji')
+    function onMouseDown(aEvent) {
+      clearCopyMark();
+
+      if (gLongPressTimer) {
+        clearTimeout(gLongPressTimer);
+        gLongPressTimer = null;
+      }
+
+      var item = getEmojiItemFromEvent(aEvent);
+      if (!item)
         return;
 
-      var emoji = target.alt || target.getAttribute('data-emoji');
+      var emoji = item.getAttribute('data-emoji');
+      gLongPressProcessed = false;
+      gLongPressTimer = setTimeout(function() {
+        gLongPressProcessed = true;
+        gLongPressTimer = null;
+        item.setAttribute('data-ready-to-copy', true);
+      }, gLongPressSeconds * 1000);
+    }
 
+    function onMouseUp(aEvent) {
+      clearCopyMark();
+
+      if (!gLongPressProcessed) {
+        if (gLongPressTimer) {
+          clearTimeout(gLongPressTimer);
+          gLongPressTimer = null;
+        }
+        return;
+      }
+
+      setTimeout(function() { // clear with delay, after "click" is fired.
+        gLongPressProcessed = false;
+      }, 0);
+      gLongPressTimer = null;
+
+      var item = getEmojiItemFromEvent(aEvent);
+      if (!item)
+        return;
+
+      var emoji = item.getAttribute('data-emoji');
+      var textarea = document.createElement('textarea');
+      textarea.setAttribute('style', 'position:fixed; bottom:0; left:0');
+      document.body.appendChild(textarea);
+      textarea.value = emoji;
+      textarea.select();
+      document.execCommand('copy');
+      textarea.parentNode.removeChild(textarea);
+
+      gEditor.focus();
+    }
+
+    function clearCopyMark() {
+      var items = document.querySelectorAll('li[data-ready-to-copy="true"]');
+      for (let item of items) {
+        item.removeAttribute('data-ready-to-copy');
+      }
+    }
+
+    function onClick(aEvent) {
+      if (!gLongPressProcessed)
+        insertEmoji(aEvent)
+    }
+
+    function insertEmoji(aEvent) {
+      var item = getEmojiItemFromEvent(aEvent);
+      if (!item)
+        return;
+
+      var emoji = item.getAttribute('data-emoji');
       var text = emoji;
       var command = 'insertText';
       if ('twemoji' in window) {
@@ -1691,6 +1771,7 @@
       for (let item of palette.querySelectorAll('li'))
       {
         item.className = 'emoji';
+        item.setAttribute('data-emoji', item.textContent);
         if (!emojified || !item.firstChild)
           continue;
         if (item.firstChild.nodeType == Node.TEXT_NODE) {

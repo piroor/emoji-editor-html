@@ -22,6 +22,8 @@ Here is the list of depending technologies:
 Open the file `emoji-editor.html` by your modern web browser. You'll see colorized emoji palette if you are using something web browser who supports colorized emoji natively, for example Firefox 50 and later.
 If you deploy the file to the Web, twemoji will be loaded automatically and all emojis are rendered by twemoji.
 
+Additionally, you can copy just one emoji to the clipboard, by long-pressing on the palette (while 1sec.)
+
 ## Known issues
 
  * There is no "Save" and "Load" feature. You need to copy/paste the constructed emoji text between something text editor which support  UTF-8 (atom, sublime, or something).
