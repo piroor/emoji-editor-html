@@ -1423,9 +1423,8 @@
       gEditor.addEventListener('compositionend', onCompositionEnd);
 
       var palette = document.getElementById('emoji-palette');
-      palette.addEventListener('click', onClick);
       palette.addEventListener('mousedown', onMouseDown);
-      palette.addEventListener('mouseup', onMouseUp);
+      palette.addEventListener('click', onClick);
 
       if (gEditingObserver)
         gEditingObserver.disconnect();
@@ -1547,7 +1546,7 @@
       }, gLongPressSeconds * 1000);
     }
 
-    function onMouseUp(aEvent) {
+    function onClick(aEvent) {
       clearCopyMark();
 
       if (!gLongPressProcessed) {
@@ -1557,31 +1556,21 @@
         }
         return;
       }
-
-      setTimeout(function() { // clear with delay, after "click" is fired.
-        gLongPressProcessed = false;
-      }, 0);
       gLongPressTimer = null;
 
       var item = getEmojiItemFromEvent(aEvent);
       if (!item)
         return;
 
-      var emoji = item.getAttribute('data-emoji');
-      var textarea = document.createElement('textarea');
-      textarea.setAttribute('style', 'position:fixed; bottom:0; left:0');
-      document.body.appendChild(textarea);
-      textarea.value = emoji;
-      textarea.select();
-      document.execCommand('copy');
-      textarea.parentNode.removeChild(textarea);
-
-      gEditor.focus();
-    }
-
-    function onClick(aEvent) {
-      if (!gLongPressProcessed)
+      if (gLongPressProcessed) {
+        gLongPressProcessed = false;
+        let emoji = item.getAttribute('data-emoji');
+        copyToClipboard(emoji);
+        gEditor.focus();
+      }
+      else {
         insertEmoji(aEvent)
+      }
     }
 
 
@@ -1598,6 +1587,16 @@
     // See: http://qiita.com/YusukeHirao/items/2f0fb8d5bbb981101be0
     function unicodeStringToChars(aInput) {
       return aInput.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[^\uD800-\uDFFF]/g) || [];
+    }
+
+    function copyToClipboard(aString) {
+      var textarea = document.createElement('textarea');
+      textarea.setAttribute('style', 'position:fixed; bottom:0; left:0');
+      document.body.appendChild(textarea);
+      textarea.value = aString;
+      textarea.select();
+      document.execCommand('copy');
+      textarea.parentNode.removeChild(textarea);
     }
 
 
@@ -1853,9 +1852,8 @@
           space.parentNode.removeChild(space);
       }
 
-      palette.addEventListener('click', onClick);
       palette.addEventListener('mousedown', onMouseDown);
-      palette.addEventListener('mouseup', onMouseUp);
+      palette.addEventListener('click', onClick);
     }
 
     if (location.protocol != 'file:') {
