@@ -1549,13 +1549,8 @@
     function onClick(aEvent) {
       clearCopyMark();
 
-      if (!gLongPressProcessed) {
-        if (gLongPressTimer) {
-          clearTimeout(gLongPressTimer);
-          gLongPressTimer = null;
-        }
-        return;
-      }
+      if (!gLongPressProcessed && gLongPressTimer)
+        clearTimeout(gLongPressTimer);
       gLongPressTimer = null;
 
       var item = getEmojiItemFromEvent(aEvent);
