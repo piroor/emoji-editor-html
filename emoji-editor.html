@@ -1549,7 +1549,7 @@
     function onClick(aEvent) {
       clearCopyMark();
 
-      if (!gLongPressProcessed && gLongPressTimer)
+      if (gLongPressTimer)
         clearTimeout(gLongPressTimer);
       gLongPressTimer = null;
 
