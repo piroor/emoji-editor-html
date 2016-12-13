@@ -24,6 +24,11 @@ If you deploy the file to the Web, twemoji will be loaded automatically and all 
 
 Additionally, you can copy just one emoji to the clipboard, by long-pressing on the palette (while 1sec.)
 
+You can change some behaviors by editing the source. Open the file with any text editor and change attribute values of the root element. Available configs:
+
+ * `data-max-recent-items`: Number of recently used items.
+ * `data-long-press-seconds`: Seconds to detect "long press" on items.
+
 ## Known issues
 
  * There is no "Save" and "Load" feature. You need to copy/paste the constructed emoji text between something text editor which support  UTF-8 (atom, sublime, or something).

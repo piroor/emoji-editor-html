@@ -9,7 +9,8 @@
     Copyright 2014 Twitter, Inc and other contributors
     Code licensed under the MIT License: http://opensource.org/licenses/MIT
 -->
-<html>
+<html data-max-recent-items="25"
+      data-long-press-seconds="1">
   <head>
     <meta charset="UTF-8">
     <title>Emoji Editor</title>
@@ -1388,6 +1389,7 @@
     var gEditor;
     var gRecent;
     var gAll;
+    var gMaxRecentItems = 25;
     var gRecentList;
     var gRecentEmoji;
     var gCursorPosition = -1;
@@ -1410,6 +1412,9 @@
       window.removeEventListener('load', onLoad);
       window.addEventListener('unload', onUnload);
       window.addEventListener('resize', onResize);
+
+      gMaxRecentItems = parseInt(document.documentElement.getAttribute('data-max-recent-items'));
+      gLongPressSeconds = parseFloat(document.documentElement.getAttribute('data-long-press-seconds'));
 
       initPalette();
 
@@ -1837,7 +1842,7 @@
       if (index > -1)
         gRecentEmoji.splice(index, 1);
       gRecentEmoji.unshift(aEmoji);
-      gRecentEmoji = gRecentEmoji.slice(0, 25);
+      gRecentEmoji = gRecentEmoji.slice(0, gMaxRecentItems);
       updateRecentList();
       localStorage.setItem('recent', gRecentEmoji.join('\n'));
     }
