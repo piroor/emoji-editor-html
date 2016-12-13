@@ -19,7 +19,8 @@
       padding: 0;
     }
     li.emoji,
-    li.emoji * {
+    li.emoji *,
+    #all h3 {
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
@@ -83,6 +84,35 @@
       bottom: 0;
       overflow: auto;
     }
+    #all h3 {
+      display: inline;
+      font-size: normal;
+      font-weight: normal;
+      border: 1px solid;
+      border-width: 0 1px 0 0;
+      padding: 0.25em 1em;
+      margin: 0;
+      cursor: pointer;
+    }
+    #all h3:first-child {
+      border-left-width: 1px;
+    }
+    #all ul {
+      position: absolute;
+      top: 2em;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: auto;
+      margin: 0;
+      visibility: hidden;
+    }
+    #all h3.active {
+      background: highlight;
+    }
+    #all h3.active + ul {
+      visibility: visible;
+    }
     </style>
     <!--script src="./twemoji.min.js"></script-->
   </head>
@@ -100,7 +130,7 @@
         </ul>
       </section>
       <section id="all">
-        <h3>People, emotion</h3>
+        <h3 title="People">😁</h3>
         <ul>
           <!-- Face, emoticon -->
           <li>😁</li>
@@ -301,7 +331,9 @@
           <li>👅</li>
           <li>👄</li>
           <li>💋</li>
-
+        </ul>
+        <h3 title="Emotion">❤</h3>
+        <ul>
           <!-- Emotion -->
           <li>💘</li>
           <li>❤</li>
@@ -356,7 +388,7 @@
           <li>🎗</li>
           <li>🏵</li>
         </ul>
-        <h3>Fashion</h3>
+        <h3 title="Fashion">👕</h3>
         <ul>
           <li>👓</li>
           <li>🕶</li>
@@ -385,7 +417,7 @@
           <li>💍</li>
           <li>💎</li>
         </ul>
-        <h3>Animals</h3>
+        <h3 title="Animals">🐱</h3>
         <ul>
           <!-- Eto -->
           <li>🐀</li>
@@ -490,7 +522,7 @@
           <li>🕷</li>
           <li>🕸</li>
         </ul>
-        <h3>Plants, foods</h3>
+        <h3 title="Plants">🌸</h3>
         <ul>
           <!-- Flower -->
           <li>💐</li>
@@ -625,7 +657,7 @@
           <li>🍽</li>
           <li>🔪</li>
         </ul>
-        <h3>Seasons, events</h3>
+        <h3 title="Seasons, events">🎄</h3>
         <ul>
           <!-- Seasons -->
           <li>🎃</li>
@@ -724,6 +756,9 @@
           <li>📯</li>
           <li>🥁</li>
 
+        </ul>
+        <h3 title="Technology">🔬</h3>
+        <ul>
           <!-- Science -->
           <li>🔬</li>
           <li>🔭</li>
@@ -886,7 +921,7 @@
           <li>🚬</li>
           <li>🗿</li>
         </ul>
-        <h3>Places, travel, weather</h3>
+        <h3 title="Places, travel, weather">🌏</h3>
         <ul>
           <li>🌏</li>
           <li>🌍</li>
@@ -1089,7 +1124,7 @@
           <li>🌊</li>
           <li>☄</li>
         </ul>
-        <h3>Generic symbols</h3>
+        <h3 title="Generic symbols">🚩</h3>
         <ul>
           <li>🏳</li>
           <li>🏴</li>
@@ -1548,6 +1583,12 @@
     function onClick(aEvent) {
       clearCopyMark();
 
+      var tab = getTabFromEvent(aEvent);
+      if (tab) {
+        tab.parentNode.querySelector('h3.active').className = '';
+        tab.className = 'active';
+      }
+
       if (gLongPressTimer)
         clearTimeout(gLongPressTimer);
       gLongPressTimer = null;
@@ -1743,6 +1784,16 @@
       ).singleNodeValue;
     }
 
+    function getTabFromEvent(aEvent) {
+      return document.evaluate(
+        'ancestor-or-self::*[contains("h3,H3", local-name())]',
+        aEvent.target,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+      ).singleNodeValue;
+    }
+
     function updateLayout() {
       var topMargin = gEditor.clientHeight + 10 /* margin */;
       gRecent.style.top = topMargin + 'px';
@@ -1845,6 +1896,10 @@
         if (space.nodeValue.trim() == '')
           space.parentNode.removeChild(space);
       }
+
+      var allPalettes = document.getElementById('all');
+      var headings = allPalettes.querySelectorAll('h3');
+      headings[0].className = 'active';
 
       palette.addEventListener('mousedown', onMouseDown);
       palette.addEventListener('click', onClick);
