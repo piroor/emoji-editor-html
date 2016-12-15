@@ -2,6 +2,8 @@
 
 Simple WYSWIG Emoji Editor based on HTML.
 
+![screenshot](./screenshot.png)
+
 ## Requirements
 
 Something Web browser which supports modern Web technologies.
